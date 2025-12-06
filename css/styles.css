@@ -1,0 +1,405 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --error: #dc2626;
+    --success: #16a34a;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding: 1rem 0 1.5rem;
+}
+
+header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.subtitle {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+}
+
+/* Main layout */
+.panels {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Input Panel */
+.input-panel {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+}
+
+.input-panel h2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+}
+
+section + section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+/* Mode toggle */
+.mode-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.toggle-label {
+    flex: 1;
+    cursor: pointer;
+}
+
+.toggle-label input {
+    display: none;
+}
+
+.toggle-label span {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.toggle-label input:checked + span {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Function inputs */
+.function-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.function-entry {
+    position: relative;
+}
+
+.function-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.function-label {
+    font-family: 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 1rem;
+    min-width: 45px;
+}
+
+.function-input,
+#param-x,
+#param-y {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    transition: border-color 0.2s;
+}
+
+.function-input:focus,
+#param-x:focus,
+#param-y:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.color-picker,
+#param-color {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.remove-function {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: var(--error);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.function-entry:hover .remove-function {
+    opacity: 1;
+}
+
+/* Range inputs for parametric */
+.range-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.range-row label {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.range-row input[type="number"] {
+    width: 70px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+/* LaTeX preview */
+.latex-preview {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--background);
+    border-radius: 8px;
+}
+
+.latex-preview h3 {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+#preview-content {
+    font-size: 1.25rem;
+    min-height: 2rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Settings */
+.setting-group {
+    margin-bottom: 1rem;
+}
+
+.setting-group > label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin-bottom: 0.375rem;
+}
+
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.range-inputs input[type="number"] {
+    width: 70px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.range-inputs span {
+    color: var(--text-light);
+    font-size: 0.875rem;
+}
+
+.checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    margin-top: 0.375rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary-color);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-secondary {
+    background: var(--background);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-export {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-export:hover {
+    background: var(--background);
+}
+
+.actions-section {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.actions-section .btn {
+    flex: 1;
+}
+
+#add-function {
+    width: 100%;
+    margin-top: 0.25rem;
+}
+
+/* Plot Panel */
+.plot-panel {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+}
+
+#plot-container {
+    width: 100%;
+    height: 500px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.export-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+/* Error message */
+.error-message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: var(--error);
+    font-size: 0.875rem;
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+/* Print styles */
+@media print {
+    .input-panel,
+    .export-buttons,
+    header {
+        display: none;
+    }
+
+    .panels {
+        display: block;
+    }
+
+    .plot-panel {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    #plot-container {
+        border: none;
+        height: auto;
+    }
+}

@@ -62,6 +62,17 @@ A web application for creating mathematical function graphs, designed for teache
 
 `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`, `tanh`, `sqrt`, `abs`, `log` (natural), `log10`, `exp`, `floor`, `ceil`, `sign`, `round`
 
+### LaTeX Logarithms
+
+In LaTeX mode, `\log` maps to the natural logarithm (consistent with `\ln` and math.js). For arbitrary bases, use `\log_{b}{x}`:
+
+| LaTeX | Result |
+|-------|--------|
+| `\ln(x)` | Natural log |
+| `\log(x)` | Natural log |
+| `\log_{2}{x}` | Log base 2 |
+| `\log_{10}{x}` | Log base 10 |
+
 ## Dependencies
 
 All loaded via CDN (no installation required):
@@ -69,6 +80,14 @@ All loaded via CDN (no installation required):
 - [Plotly.js](https://plotly.com/javascript/) - Graphing
 - [math.js](https://mathjs.org/) - Expression parsing
 - [KaTeX](https://katex.org/) - LaTeX rendering
+
+## Development
+
+```bash
+npm install              # Install dev dependencies
+npm test                 # Run browser tests (Playwright)
+npm run lint             # Run ESLint
+```
 
 ## License
 

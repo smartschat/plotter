@@ -190,38 +190,141 @@ const Parser = (function() {
     }
 
     /**
-     * Generate data points for plotting
+     * Generate data points for plotting with adaptive sampling
      */
-    function generatePoints(compiled, variable, min, max, numPoints = 1000) {
-        const step = (max - min) / numPoints;
+    function generatePoints(compiled, variable, min, max, numPoints = 2000) {
+        // Generate initial uniform samples
         const xValues = [];
         const yValues = [];
 
-        for (let i = 0; i <= numPoints; i++) {
-            const x = min + i * step;
+        // Create initial x samples with extra density near zero if range crosses it
+        const xSamples = generateAdaptiveXSamples(min, max, numPoints);
+
+        for (const x of xSamples) {
             const y = evaluate(compiled, variable, x);
-
-            // Handle discontinuities by checking for large jumps
-            if (yValues.length > 0) {
-                const lastY = yValues[yValues.length - 1];
-                if (Math.abs(y - lastY) > 100 && !isNaN(lastY) && !isNaN(y)) {
-                    // Insert NaN to create a break in the line
-                    xValues.push(x);
-                    yValues.push(NaN);
-                }
-            }
-
             xValues.push(x);
             yValues.push(isFinite(y) ? y : NaN);
         }
 
-        return { x: xValues, y: yValues };
+        // Refine: add points where function changes rapidly
+        const refined = refinePoints(compiled, variable, xValues, yValues);
+
+        // Insert NaN at discontinuities
+        return insertDiscontinuities(refined.x, refined.y);
+    }
+
+    /**
+     * Generate x samples with higher density near zero
+     */
+    function generateAdaptiveXSamples(min, max, numPoints) {
+        const samples = new Set();
+        const step = (max - min) / numPoints;
+
+        // Uniform samples across full range
+        for (let i = 0; i <= numPoints; i++) {
+            samples.add(min + i * step);
+        }
+
+        // Add logarithmically-spaced samples near zero for better resolution
+        if (min < 0 && max > 0) {
+            // Positive side: from small positive to max
+            const minExp = -10; // 10^-10
+            const maxExp = Math.log10(Math.max(max, 1));
+            for (let i = 0; i <= 100; i++) {
+                const exp = minExp + (maxExp - minExp) * (i / 100);
+                const x = Math.pow(10, exp);
+                if (x > 0 && x < max) samples.add(x);
+            }
+
+            // Negative side: from min to small negative
+            for (let i = 0; i <= 100; i++) {
+                const exp = minExp + (maxExp - minExp) * (i / 100);
+                const x = -Math.pow(10, exp);
+                if (x < 0 && x > min) samples.add(x);
+            }
+        } else if (min >= 0) {
+            // All positive range - add log samples near min
+            const minVal = Math.max(min, 1e-10);
+            const minExp = Math.log10(minVal);
+            const maxExp = Math.log10(Math.max(max, 1));
+            for (let i = 0; i <= 100; i++) {
+                const exp = minExp + (maxExp - minExp) * (i / 100);
+                samples.add(Math.pow(10, exp));
+            }
+        }
+
+        return Array.from(samples).sort((a, b) => a - b);
+    }
+
+    /**
+     * Add more points where the function changes rapidly
+     */
+    function refinePoints(compiled, variable, xValues, yValues, maxIterations = 2) {
+        let xArr = [...xValues];
+        let yArr = [...yValues];
+
+        for (let iter = 0; iter < maxIterations; iter++) {
+            const newX = [];
+            const newY = [];
+
+            for (let i = 0; i < xArr.length; i++) {
+                newX.push(xArr[i]);
+                newY.push(yArr[i]);
+
+                if (i < xArr.length - 1) {
+                    const y1 = yArr[i];
+                    const y2 = yArr[i + 1];
+                    const dx = xArr[i + 1] - xArr[i];
+
+                    // Add midpoint if there's a large change relative to step size
+                    if (!isNaN(y1) && !isNaN(y2) && dx > 1e-12) {
+                        const dy = Math.abs(y2 - y1);
+                        const shouldRefine = dy > 1 && dy / dx > 10;
+
+                        if (shouldRefine) {
+                            const midX = (xArr[i] + xArr[i + 1]) / 2;
+                            const midY = evaluate(compiled, variable, midX);
+                            newX.push(midX);
+                            newY.push(isFinite(midY) ? midY : NaN);
+                        }
+                    }
+                }
+            }
+
+            xArr = newX;
+            yArr = newY;
+        }
+
+        return { x: xArr, y: yArr };
+    }
+
+    /**
+     * Insert NaN at discontinuities to break the line
+     */
+    function insertDiscontinuities(xValues, yValues) {
+        const xOut = [];
+        const yOut = [];
+
+        for (let i = 0; i < xValues.length; i++) {
+            if (i > 0 && yOut.length > 0) {
+                const lastY = yOut[yOut.length - 1];
+                const y = yValues[i];
+                if (!isNaN(lastY) && !isNaN(y) && Math.abs(y - lastY) > 100) {
+                    xOut.push(xValues[i]);
+                    yOut.push(NaN);
+                }
+            }
+            xOut.push(xValues[i]);
+            yOut.push(yValues[i]);
+        }
+
+        return { x: xOut, y: yOut };
     }
 
     /**
      * Generate parametric curve points
      */
-    function generateParametricPoints(compiledX, compiledY, tMin, tMax, numPoints = 1000) {
+    function generateParametricPoints(compiledX, compiledY, tMin, tMax, numPoints = 5000) {
         const step = (tMax - tMin) / numPoints;
         const xValues = [];
         const yValues = [];

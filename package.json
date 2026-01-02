@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "node tests/run.js"
+    "test": "node tests/run.js",
+    "lint": "eslint js/ tests/*.js"
   },
   "devDependencies": {
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
     "playwright": "^1.40.0"
   }
 }

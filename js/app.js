@@ -130,7 +130,7 @@
     /**
      * Handle input changes
      */
-    function handleInputChange(e) {
+    function handleInputChange(_e) {
         if (currentMode === 'latex') {
             updateLatexPreview();
         }
@@ -156,7 +156,7 @@
                     throwOnError: false,
                     displayMode: true
                 });
-            } catch (e) {
+            } catch (_e) {
                 elements.previewContent.textContent = latex;
             }
         } else {

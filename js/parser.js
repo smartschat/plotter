@@ -207,7 +207,7 @@ const Parser = (function() {
             const scope = {};
             scope[variable] = value;
             return compiled.evaluate(scope);
-        } catch (error) {
+        } catch (_error) {
             return NaN;
         }
     }

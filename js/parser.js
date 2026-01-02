@@ -38,9 +38,13 @@ const Parser = (function() {
 
         // Logarithms
         { pattern: /\\ln/g, replace: 'log' },
-        { pattern: /\\log_{10}/g, replace: 'log10' },
-        { pattern: /\\log_\{10\}/g, replace: 'log10' },
-        { pattern: /\\log/g, replace: 'log10' },
+        { pattern: /\\log_\{([^{}]+)\}\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g,
+          replace: 'log($2, $1)' },
+        { pattern: /\\log_([a-zA-Z0-9]+)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g,
+          replace: 'log($2, $1)' },
+        { pattern: /\\log_\{([^{}]+)\}\s*\(([^()]*)\)/g, replace: 'log($2, $1)' },
+        { pattern: /\\log_([a-zA-Z0-9]+)\s*\(([^()]*)\)/g, replace: 'log($2, $1)' },
+        { pattern: /\\log/g, replace: 'log' },
 
         // Exponential
         { pattern: /\\exp/g, replace: 'exp' },
@@ -60,7 +64,6 @@ const Parser = (function() {
         { pattern: /\\cdot/g, replace: '*' },
         { pattern: /\\times/g, replace: '*' },
         { pattern: /\\div/g, replace: '/' },
-        { pattern: /\\pm/g, replace: '+' },
 
         // Powers with braces: x^{2} -> x^(2)
         { pattern: /\^\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g, replace: '^($1)' },
@@ -89,6 +92,10 @@ const Parser = (function() {
     function latexToMath(latex) {
         let result = latex.trim();
 
+        if (result.includes('\\pm')) {
+            throw new Error('Unsupported operator: \\pm. Enter separate functions instead.');
+        }
+
         // Apply all replacement rules (may need multiple passes for nested structures)
         for (let pass = 0; pass < 3; pass++) {
             for (const rule of latexReplacements) {
@@ -113,10 +120,16 @@ const Parser = (function() {
         let result = expr;
 
         // Number followed by variable or function: 2x -> 2*x, 2sin -> 2*sin
-        result = result.replace(/(\d)([a-zA-Z])/g, '$1*$2');
+        result = result.replace(/(\d)([a-zA-Z])/g, (match, digit, letter, offset, str) => {
+            const nextChar = str[offset + match.length];
+            if ((letter === 'e' || letter === 'E') && nextChar && /[+\-\d]/.test(nextChar)) {
+                return match;
+            }
+            return digit + '*' + letter;
+        });
 
         // Variable followed by opening paren: x(... -> x*(
-        result = result.replace(/([a-zA-Z])(\()/g, (match, v, p) => {
+        result = result.replace(/([a-zA-Z])(\()/g, (match, v, p, offset, str) => {
             // Check if it's a function name
             const functions = ['sin', 'cos', 'tan', 'cot', 'sec', 'csc',
                              'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh',
@@ -124,7 +137,7 @@ const Parser = (function() {
                              'nthRoot', 'pow', 'sign', 'round'];
 
             // Look backwards to see if this is part of a function name
-            const beforeMatch = result.substring(0, result.indexOf(match));
+            const beforeMatch = str.substring(0, offset);
             for (const func of functions) {
                 if (beforeMatch.endsWith(func.slice(0, -1)) && v === func.slice(-1)) {
                     return match; // It's a function, don't add multiplication
@@ -158,7 +171,17 @@ const Parser = (function() {
      * Parse and compile an expression for evaluation
      */
     function compile(expression, isLatex = false) {
-        let mathExpr = isLatex ? latexToMath(expression) : addImplicitMultiplication(expression);
+        let mathExpr;
+
+        try {
+            mathExpr = isLatex ? latexToMath(expression) : addImplicitMultiplication(expression);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message || 'Parse error',
+                expression: expression
+            };
+        }
 
         try {
             const compiled = math.compile(mathExpr);

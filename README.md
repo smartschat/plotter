@@ -1,7 +1,7 @@
 # Function Plotter
 
-[![Tests](https://github.com/smartschat/plotter/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/smartschat/plotter/actions/workflows/test.yml)
-[![Lint](https://github.com/smartschat/plotter/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/smartschat/plotter/actions/workflows/lint.yml)
+[![Tests](https://github.com/smartschat/plotter/actions/workflows/test.yml/badge.svg)](https://github.com/smartschat/plotter/actions/workflows/test.yml)
+[![Lint](https://github.com/smartschat/plotter/actions/workflows/lint.yml/badge.svg)](https://github.com/smartschat/plotter/actions/workflows/lint.yml)
 
 A web application for creating mathematical function graphs, designed for teachers creating worksheets.
 
